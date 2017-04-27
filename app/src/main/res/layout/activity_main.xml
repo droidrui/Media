@@ -4,11 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:padding="16dp"
     tools:context="com.droidrui.media.MainActivity">
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:onClick="encodeAndMuxTest"
         android:text="EncodeAndMuxTest"
         android:textAllCaps="false" />
 

@@ -33,7 +33,7 @@ public class EncodeAndMuxActivity extends Activity {
     private static final String MIME_TYPE = "video/avc";    // H.264 Advanced Video Coding
     private static final int FRAME_RATE = 15;               // 15fps
     private static final int IFRAME_INTERVAL = 10;          // 10 seconds between I-frames
-    private static final int NUM_FRAMES = 30;               // two seconds of video
+    private static final int NUM_FRAMES = 30 * 5;               // two * 5 seconds of video
 
     // RGB color values for generated frames
     private static final int TEST_R0 = 0;
@@ -64,6 +64,13 @@ public class EncodeAndMuxActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_encode_and_mux);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                testEncodeVideoToMp4();
+            }
+        }).start();
     }
 
 
