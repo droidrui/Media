@@ -69,10 +69,20 @@ public class EncodeAndMuxActivity extends Activity {
             @Override
             public void run() {
                 testEncodeVideoToMp4();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        finish();
+                    }
+                });
             }
         }).start();
     }
 
+    @Override
+    public void onBackPressed() {
+
+    }
 
     /**
      * Tests encoding of AVC video from a Surface.  The output is saved as an MP4 file.
