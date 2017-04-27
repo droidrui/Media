@@ -22,7 +22,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".EncodeAndMuxActivity" />
-        <activity android:name=".CameraToMpegActivity"></activity>
+        <activity android:name=".CameraToMpegActivity" />
+        <activity android:name=".GameRecorderActivity"></activity>
     </application>
 
 </manifest>

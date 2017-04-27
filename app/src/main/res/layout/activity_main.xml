@@ -24,7 +24,8 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="GameRecorder"
+        android:onClick="gameRecorderTest"
+        android:text="GameRecorderTest"
         android:textAllCaps="false" />
 
     <Button
