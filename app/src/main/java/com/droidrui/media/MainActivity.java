@@ -17,4 +17,8 @@ public class MainActivity extends Activity {
         startActivity(new Intent(this, EncodeAndMuxActivity.class));
     }
 
+    public void cameraToMpegTest(View view) {
+        startActivity(new Intent(this, CameraToMpegActivity.class));
+    }
+
 }
