@@ -24,13 +24,7 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="gameRecorderTest"
-        android:text="GameRecorderTest"
-        android:textAllCaps="false" />
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:onClick="encodeDecodeTest"
         android:text="EncodeDecodeTest"
         android:textAllCaps="false" />
 

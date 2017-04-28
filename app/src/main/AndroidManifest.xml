@@ -23,7 +23,7 @@
         </activity>
         <activity android:name=".EncodeAndMuxActivity" />
         <activity android:name=".CameraToMpegActivity" />
-        <activity android:name=".GameRecorderActivity"></activity>
+        <activity android:name=".EncodeDecodeActivity"></activity>
     </application>
 
 </manifest>

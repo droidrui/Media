@@ -21,8 +21,9 @@ public class MainActivity extends Activity {
         startActivity(new Intent(this, CameraToMpegActivity.class));
     }
 
-    public void gameRecorderTest(View view) {
-        startActivity(new Intent(this, GameRecorderActivity.class));
+    public void encodeDecodeTest(View view) {
+        startActivity(new Intent(this, EncodeDecodeActivity.class));
     }
+
 
 }
