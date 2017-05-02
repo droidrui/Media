@@ -23,13 +23,14 @@ public class MainActivity extends Activity {
         mList.add("EncodeAndMuxTest");
         mList.add("CameraToMpegTest");
         mList.add("EncodeDecodeTest");
-        mList.add("DecoderTest ");
+        mList.add("ExtractFrameTest ");
         mList.add("encodeAndMuxTest");
         mList.add("encodeAndMuxTest");
         mList.add("encodeAndMuxTest");
         mList.add("encodeAndMuxTest");
         mList.add("encodeAndMuxTest");
         mList.add("encodeAndMuxTest");
+        mList.add("ExtractFrameTest");
 
         mListView = (ListView) findViewById(R.id.list_view);
         TestItemAdapter adapter = new TestItemAdapter(this, mList);
@@ -48,7 +49,7 @@ public class MainActivity extends Activity {
                         startActivity(new Intent(MainActivity.this, EncodeDecodeActivity.class));
                         break;
                     case 3:
-
+                        startActivity(new Intent(MainActivity.this, ExtractFrameActivity.class));
                         break;
                 }
             }
