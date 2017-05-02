@@ -24,7 +24,8 @@
         <activity android:name=".EncodeAndMuxActivity" />
         <activity android:name=".CameraToMpegActivity" />
         <activity android:name=".EncodeDecodeActivity" />
-        <activity android:name=".ExtractFrameActivity"></activity>
+        <activity android:name=".ExtractFrameActivity" />
+        <activity android:name=".EncodeActivity"></activity>
     </application>
 
 </manifest>

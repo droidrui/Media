@@ -24,7 +24,7 @@ public class MainActivity extends Activity {
         mList.add("CameraToMpegTest");
         mList.add("EncodeDecodeTest");
         mList.add("ExtractFrameTest ");
-        mList.add("encodeAndMuxTest");
+        mList.add("EncodeTest");
         mList.add("encodeAndMuxTest");
         mList.add("encodeAndMuxTest");
         mList.add("encodeAndMuxTest");
@@ -50,6 +50,9 @@ public class MainActivity extends Activity {
                         break;
                     case 3:
                         startActivity(new Intent(MainActivity.this, ExtractFrameActivity.class));
+                        break;
+                    case 4:
+                        startActivity(new Intent(MainActivity.this, EncodeActivity.class));
                         break;
                 }
             }
