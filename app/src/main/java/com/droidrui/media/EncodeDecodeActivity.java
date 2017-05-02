@@ -29,12 +29,15 @@ public class EncodeDecodeActivity extends Activity {
     private static final boolean VERBOSE = false;           // lots of logging
     private static final boolean DEBUG_SAVE_FILE = false;   // save copy of encoded movie
     private static final String DEBUG_FILE_NAME_BASE = "/sdcard/test.";
+
     // parameters for the encoder
     private static final String MIME_TYPE = "video/avc";    // H.264 Advanced Video Coding
     private static final int FRAME_RATE = 15;               // 15fps
     private static final int IFRAME_INTERVAL = 10;          // 10 seconds between I-frames
+
     // movie length, in frames
     private static final int NUM_FRAMES = 30;               // two seconds of video
+
     private static final int TEST_Y = 120;                  // YUV values for colored rect
     private static final int TEST_U = 160;
     private static final int TEST_V = 200;
@@ -44,11 +47,13 @@ public class EncodeDecodeActivity extends Activity {
     private static final int TEST_R1 = 236;                 // RGB equivalent of {120,160,200}
     private static final int TEST_G1 = 50;
     private static final int TEST_B1 = 186;
+
     // size of a frame, in pixels
     private int mWidth = -1;
     private int mHeight = -1;
     // bit rate, in bits per second
     private int mBitRate = -1;
+
     // largest color component delta seen (i.e. actual vs. expected)
     private int mLargestColorDelta;
 
@@ -57,7 +62,11 @@ public class EncodeDecodeActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_encode_decode);
 
-
+        try {
+            testEncodeDecodeVideoFromBufferToSurface720p();
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
     }
 
 
@@ -70,12 +79,10 @@ public class EncodeDecodeActivity extends Activity {
         setParameters(176, 144, 1000000);
         encodeDecodeVideoFromBuffer(false);
     }
-
     public void testEncodeDecodeVideoFromBufferToBufferQVGA() throws Exception {
         setParameters(320, 240, 2000000);
         encodeDecodeVideoFromBuffer(false);
     }
-
     public void testEncodeDecodeVideoFromBufferToBuffer720p() throws Exception {
         setParameters(1280, 720, 6000000);
         encodeDecodeVideoFromBuffer(false);
@@ -97,12 +104,10 @@ public class EncodeDecodeActivity extends Activity {
         setParameters(176, 144, 1000000);
         BufferToSurfaceWrapper.runTest(this);
     }
-
     public void testEncodeDecodeVideoFromBufferToSurfaceQVGA() throws Throwable {
         setParameters(320, 240, 2000000);
         BufferToSurfaceWrapper.runTest(this);
     }
-
     public void testEncodeDecodeVideoFromBufferToSurface720p() throws Throwable {
         setParameters(1280, 720, 6000000);
         BufferToSurfaceWrapper.runTest(this);
@@ -150,20 +155,16 @@ public class EncodeDecodeActivity extends Activity {
         setParameters(176, 144, 1000000);
         SurfaceToSurfaceWrapper.runTest(this);
     }
-
     public void testEncodeDecodeVideoFromSurfaceToSurfaceQVGA() throws Throwable {
         setParameters(320, 240, 2000000);
         SurfaceToSurfaceWrapper.runTest(this);
     }
-
     public void testEncodeDecodeVideoFromSurfaceToSurface720p() throws Throwable {
         setParameters(1280, 720, 6000000);
         SurfaceToSurfaceWrapper.runTest(this);
     }
 
-    /**
-     * Wraps testEncodeDecodeVideoFromSurfaceToSurface()
-     */
+    /** Wraps testEncodeDecodeVideoFromSurfaceToSurface() */
     private static class SurfaceToSurfaceWrapper implements Runnable {
         private Throwable mThrowable;
         private EncodeDecodeActivity mTest;
@@ -218,7 +219,9 @@ public class EncodeDecodeActivity extends Activity {
     private void encodeDecodeVideoFromBuffer(boolean toSurface) throws Exception {
         MediaCodec encoder = null;
         MediaCodec decoder = null;
+
         mLargestColorDelta = -1;
+
         try {
             MediaCodecInfo codecInfo = selectCodec(MIME_TYPE);
             if (codecInfo == null) {
@@ -227,11 +230,14 @@ public class EncodeDecodeActivity extends Activity {
                 return;
             }
             if (VERBOSE) Log.d(TAG, "found codec: " + codecInfo.getName());
+
             int colorFormat = selectColorFormat(codecInfo, MIME_TYPE);
             if (VERBOSE) Log.d(TAG, "found colorFormat: " + colorFormat);
+
             // We avoid the device-specific limitations on width and height by using values that
             // are multiples of 16, which all tested devices seem to be able to handle.
             MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE, mWidth, mHeight);
+
             // Set some properties.  Failing to specify some of these can cause the MediaCodec
             // configure() call to throw an unhelpful exception.
             format.setInteger(MediaFormat.KEY_COLOR_FORMAT, colorFormat);
@@ -239,14 +245,17 @@ public class EncodeDecodeActivity extends Activity {
             format.setInteger(MediaFormat.KEY_FRAME_RATE, FRAME_RATE);
             format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, IFRAME_INTERVAL);
             if (VERBOSE) Log.d(TAG, "format: " + format);
+
             // Create a MediaCodec for the desired codec, then configure it as an encoder with
             // our desired properties.
             encoder = MediaCodec.createByCodecName(codecInfo.getName());
             encoder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
             encoder.start();
+
             // Create a MediaCodec for the decoder, just based on the MIME type.  The various
             // format details will be passed through the csd-0 meta-data later on.
             decoder = MediaCodec.createDecoderByType(MIME_TYPE);
+
             doEncodeDecodeVideoFromBuffer(encoder, colorFormat, decoder, toSurface);
         } finally {
             if (VERBOSE) Log.d(TAG, "releasing codecs");
@@ -258,6 +267,7 @@ public class EncodeDecodeActivity extends Activity {
                 decoder.stop();
                 decoder.release();
             }
+
             Log.i(TAG, "Largest color delta: " + mLargestColorDelta);
         }
     }
@@ -273,7 +283,9 @@ public class EncodeDecodeActivity extends Activity {
         MediaCodec decoder = null;
         InputSurface inputSurface = null;
         OutputSurface outputSurface = null;
+
         mLargestColorDelta = -1;
+
         try {
             MediaCodecInfo codecInfo = selectCodec(MIME_TYPE);
             if (codecInfo == null) {
@@ -282,10 +294,13 @@ public class EncodeDecodeActivity extends Activity {
                 return;
             }
             if (VERBOSE) Log.d(TAG, "found codec: " + codecInfo.getName());
+
             int colorFormat = MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface;
+
             // We avoid the device-specific limitations on width and height by using values that
             // are multiples of 16, which all tested devices seem to be able to handle.
             MediaFormat format = MediaFormat.createVideoFormat(MIME_TYPE, mWidth, mHeight);
+
             // Set some properties.  Failing to specify some of these can cause the MediaCodec
             // configure() call to throw an unhelpful exception.
             format.setInteger(MediaFormat.KEY_COLOR_FORMAT, colorFormat);
@@ -293,20 +308,24 @@ public class EncodeDecodeActivity extends Activity {
             format.setInteger(MediaFormat.KEY_FRAME_RATE, FRAME_RATE);
             format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, IFRAME_INTERVAL);
             if (VERBOSE) Log.d(TAG, "format: " + format);
+
             // Create the output surface.
             outputSurface = new OutputSurface(mWidth, mHeight);
+
             // Create a MediaCodec for the decoder, just based on the MIME type.  The various
             // format details will be passed through the csd-0 meta-data later on.
             decoder = MediaCodec.createDecoderByType(MIME_TYPE);
             MediaFormat decoderFormat = MediaFormat.createVideoFormat(MIME_TYPE, mWidth, mHeight);
             decoder.configure(format, outputSurface.getSurface(), null, 0);
             decoder.start();
+
             // Create a MediaCodec for the desired codec, then configure it as an encoder with
             // our desired properties.  Request a Surface to use for input.
             encoder = MediaCodec.createByCodecName(codecInfo.getName());
             encoder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
             inputSurface = new InputSurface(encoder.createInputSurface());
             encoder.start();
+
             doEncodeDecodeVideoFromSurfaceToSurface(encoder, inputSurface, colorFormat, decoder, outputSurface);
         } finally {
             if (VERBOSE) Log.d(TAG, "releasing codecs");
@@ -324,6 +343,7 @@ public class EncodeDecodeActivity extends Activity {
                 decoder.stop();
                 decoder.release();
             }
+
             Log.i(TAG, "Largest color delta: " + mLargestColorDelta);
         }
     }
@@ -336,9 +356,11 @@ public class EncodeDecodeActivity extends Activity {
         int numCodecs = MediaCodecList.getCodecCount();
         for (int i = 0; i < numCodecs; i++) {
             MediaCodecInfo codecInfo = MediaCodecList.getCodecInfoAt(i);
+
             if (!codecInfo.isEncoder()) {
                 continue;
             }
+
             String[] types = codecInfo.getSupportedTypes();
             for (int j = 0; j < types.length; j++) {
                 if (types[j].equalsIgnoreCase(mimeType)) {
@@ -419,13 +441,16 @@ public class EncodeDecodeActivity extends Activity {
         int badFrames = 0;
         boolean decoderConfigured = false;
         OutputSurface outputSurface = null;
+
         // The size of a frame of video data, in the formats we handle, is stride*sliceHeight
         // for Y, and (stride/2)*(sliceHeight/2) for each of the Cb and Cr channels.  Application
         // of algebra and assuming that stride==width and sliceHeight==height yields:
         byte[] frameData = new byte[mWidth * mHeight * 3 / 2];
+
         // Just out of curiosity.
         long rawSize = 0;
         long encodedSize = 0;
+
         // Save a copy to disk.  Useful for debugging the test.  Note this is a raw elementary
         // stream, not a .mp4 file, so not all players will know what to do with it.
         FileOutputStream outputStream = null;
@@ -439,15 +464,18 @@ public class EncodeDecodeActivity extends Activity {
                 throw new RuntimeException(ioe);
             }
         }
+
         if (toSurface) {
             outputSurface = new OutputSurface(mWidth, mHeight);
         }
+
         // Loop until the output side is done.
         boolean inputDone = false;
         boolean encoderDone = false;
         boolean outputDone = false;
         while (!outputDone) {
             if (VERBOSE) Log.d(TAG, "loop");
+
             // If we're not done submitting frames, generate a new one and submit it.  By
             // doing this on every loop we're working to ensure that the encoder always has
             // work to do.
@@ -469,11 +497,13 @@ public class EncodeDecodeActivity extends Activity {
                         if (VERBOSE) Log.d(TAG, "sent input EOS (with zero-length frame)");
                     } else {
                         generateFrame(generateIndex, encoderColorFormat, frameData);
+
                         ByteBuffer inputBuf = encoderInputBuffers[inputBufIndex];
                         // the buffer should be sized to hold one full frame
                         assertTrue(inputBuf.capacity() >= frameData.length);
                         inputBuf.clear();
                         inputBuf.put(frameData);
+
                         encoder.queueInputBuffer(inputBufIndex, 0, frameData.length, ptsUsec, 0);
                         if (VERBOSE) Log.d(TAG, "submitted frame " + generateIndex + " to enc");
                     }
@@ -483,6 +513,7 @@ public class EncodeDecodeActivity extends Activity {
                     if (VERBOSE) Log.d(TAG, "input buffer not available");
                 }
             }
+
             // Check for output from the encoder.  If there's no output yet, we either need to
             // provide more input, or we need to wait for the encoder to work its magic.  We
             // can't actually tell which is the case, so if we can't get an output buffer right
@@ -509,9 +540,11 @@ public class EncodeDecodeActivity extends Activity {
                     if (encodedData == null) {
                         fail("encoderOutputBuffer " + encoderStatus + " was null");
                     }
+
                     // It's usually necessary to adjust the ByteBuffer values to match BufferInfo.
                     encodedData.position(info.offset);
                     encodedData.limit(info.offset + info.size);
+
                     encodedSize += info.size;
                     if (outputStream != null) {
                         byte[] data = new byte[info.size];
@@ -548,13 +581,16 @@ public class EncodeDecodeActivity extends Activity {
                         inputBuf.put(encodedData);
                         decoder.queueInputBuffer(inputBufIndex, 0, info.size,
                                 info.presentationTimeUs, info.flags);
+
                         encoderDone = (info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0;
                         if (VERBOSE) Log.d(TAG, "passed " + info.size + " bytes to decoder"
                                 + (encoderDone ? " (EOS)" : ""));
                     }
+
                     encoder.releaseOutputBuffer(encoderStatus, false);
                 }
             }
+
             // Check for output from the decoder.  We want to do this on every loop to avoid
             // the possibility of stalling the pipeline.  We use a short timeout to avoid
             // burning CPU if the decoder is hard at work but the next frame isn't quite ready.
@@ -582,8 +618,10 @@ public class EncodeDecodeActivity extends Activity {
                 } else {  // decoderStatus >= 0
                     if (!toSurface) {
                         ByteBuffer outputFrame = decoderOutputBuffers[decoderStatus];
+
                         outputFrame.position(info.offset);
                         outputFrame.limit(info.offset + info.size);
+
                         rawSize += info.size;
                         if (info.size == 0) {
                             if (VERBOSE) Log.d(TAG, "got empty frame");
@@ -595,6 +633,7 @@ public class EncodeDecodeActivity extends Activity {
                                 badFrames++;
                             }
                         }
+
                         if ((info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
                             if (VERBOSE) Log.d(TAG, "output EOS");
                             outputDone = true;
@@ -608,7 +647,9 @@ public class EncodeDecodeActivity extends Activity {
                             if (VERBOSE) Log.d(TAG, "output EOS");
                             outputDone = true;
                         }
+
                         boolean doRender = (info.size != 0);
+
                         // As soon as we call releaseOutputBuffer, the buffer will be forwarded
                         // to SurfaceTexture to convert to a texture.  The API doesn't guarantee
                         // that the texture will be available before the call returns, so we
@@ -628,6 +669,7 @@ public class EncodeDecodeActivity extends Activity {
                 }
             }
         }
+
         if (VERBOSE) Log.d(TAG, "decoded " + checkIndex + " frames at "
                 + mWidth + "x" + mHeight + ": raw=" + rawSize + ", enc=" + encodedSize);
         if (outputStream != null) {
@@ -638,9 +680,11 @@ public class EncodeDecodeActivity extends Activity {
                 throw new RuntimeException(ioe);
             }
         }
+
         if (outputSurface != null) {
             outputSurface.release();
         }
+
         if (checkIndex != NUM_FRAMES) {
             fail("expected " + NUM_FRAMES + " frames, only decoded " + checkIndex);
         }
@@ -662,6 +706,7 @@ public class EncodeDecodeActivity extends Activity {
         int generateIndex = 0;
         int checkIndex = 0;
         int badFrames = 0;
+
         // Save a copy to disk.  Useful for debugging the test.  Note this is a raw elementary
         // stream, not a .mp4 file, so not all players will know what to do with it.
         FileOutputStream outputStream = null;
@@ -675,12 +720,14 @@ public class EncodeDecodeActivity extends Activity {
                 throw new RuntimeException(ioe);
             }
         }
+
         // Loop until the output side is done.
         boolean inputDone = false;
         boolean encoderDone = false;
         boolean outputDone = false;
         while (!outputDone) {
             if (VERBOSE) Log.d(TAG, "loop");
+
             // If we're not done submitting frames, generate a new one and submit it.  The
             // eglSwapBuffers call will block if the input is full.
             if (!inputDone) {
@@ -698,6 +745,7 @@ public class EncodeDecodeActivity extends Activity {
                 }
                 generateIndex++;
             }
+
             // Assume output is available.  Loop until both assumptions are false.
             boolean decoderOutputAvailable = true;
             boolean encoderOutputAvailable = !encoderDone;
@@ -725,9 +773,11 @@ public class EncodeDecodeActivity extends Activity {
                         if (VERBOSE) Log.d(TAG, "output EOS");
                         outputDone = true;
                     }
+
                     // The ByteBuffers are null references, but we still get a nonzero size for
                     // the decoded data.
                     boolean doRender = (info.size != 0);
+
                     // As soon as we call releaseOutputBuffer, the buffer will be forwarded
                     // to SurfaceTexture to convert to a texture.  The API doesn't guarantee
                     // that the texture will be available before the call returns, so we
@@ -750,6 +800,7 @@ public class EncodeDecodeActivity extends Activity {
                     // Continue attempts to drain output.
                     continue;
                 }
+
                 // Decoder is drained, check to see if we've got a new buffer of output from
                 // the encoder.
                 if (!encoderDone) {
@@ -773,9 +824,11 @@ public class EncodeDecodeActivity extends Activity {
                         if (encodedData == null) {
                             fail("encoderOutputBuffer " + encoderStatus + " was null");
                         }
+
                         // It's usually necessary to adjust the ByteBuffer values to match BufferInfo.
                         encodedData.position(info.offset);
                         encodedData.limit(info.offset + info.size);
+
                         if (outputStream != null) {
                             byte[] data = new byte[info.size];
                             encodedData.get(data);
@@ -787,6 +840,7 @@ public class EncodeDecodeActivity extends Activity {
                                 throw new RuntimeException(ioe);
                             }
                         }
+
                         // Get a decoder input buffer, blocking until it's available.  We just
                         // drained the decoder output, so we expect there to be a free input
                         // buffer now or in the near future (i.e. this should never deadlock
@@ -800,6 +854,7 @@ public class EncodeDecodeActivity extends Activity {
                         inputBuf.put(encodedData);
                         decoder.queueInputBuffer(inputBufIndex, 0, info.size,
                                 info.presentationTimeUs, info.flags);
+
                         // If everything from the encoder has been passed to the decoder, we
                         // can stop polling the encoder output.  (This just an optimization.)
                         if ((info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
@@ -808,11 +863,13 @@ public class EncodeDecodeActivity extends Activity {
                         }
                         if (VERBOSE) Log.d(TAG, "passed " + info.size + " bytes to decoder"
                                 + (encoderDone ? " (EOS)" : ""));
+
                         encoder.releaseOutputBuffer(encoderStatus, false);
                     }
                 }
             }
         }
+
         if (outputStream != null) {
             try {
                 outputStream.close();
@@ -821,6 +878,7 @@ public class EncodeDecodeActivity extends Activity {
                 throw new RuntimeException(ioe);
             }
         }
+
         if (checkIndex != NUM_FRAMES) {
             fail("expected " + NUM_FRAMES + " frames, only decoded " + checkIndex);
         }
@@ -828,6 +886,7 @@ public class EncodeDecodeActivity extends Activity {
             fail("Found " + badFrames + " bad frames");
         }
     }
+
 
     /**
      * Generates data for frame N into the supplied buffer.  We have an 8-frame animation
@@ -841,9 +900,12 @@ public class EncodeDecodeActivity extends Activity {
     private void generateFrame(int frameIndex, int colorFormat, byte[] frameData) {
         final int HALF_WIDTH = mWidth / 2;
         boolean semiPlanar = isSemiPlanarYUV(colorFormat);
+
         // Set to zero.  In YUV this is a dull green.
         Arrays.fill(frameData, (byte) 0);
+
         int startX, startY, countX, countY;
+
         frameIndex %= 8;
         //frameIndex = (frameIndex / 8) % 8;    // use this instead for debug -- easier to see
         if (frameIndex < 4) {
@@ -853,6 +915,7 @@ public class EncodeDecodeActivity extends Activity {
             startX = (7 - frameIndex) * (mWidth / 4);
             startY = mHeight / 2;
         }
+
         for (int y = startY + (mHeight / 2) - 1; y >= startY; --y) {
             for (int x = startX + (mWidth / 4) - 1; x >= startX; --x) {
                 if (semiPlanar) {
@@ -900,6 +963,7 @@ public class EncodeDecodeActivity extends Activity {
                     Integer.toHexString(colorFormat));
             return true;
         }
+
         boolean frameFailed = false;
         boolean semiPlanar = isSemiPlanarYUV(colorFormat);
         int width = format.getInteger(MediaFormat.KEY_WIDTH);
@@ -911,8 +975,10 @@ public class EncodeDecodeActivity extends Activity {
         int cropBottom = format.getInteger("crop-bottom");
         int cropWidth = cropRight - cropLeft + 1;
         int cropHeight = cropBottom - cropTop + 1;
+
         assertEquals(mWidth, cropWidth);
         assertEquals(mHeight, cropHeight);
+
         for (int i = 0; i < 8; i++) {
             int x, y;
             if (i < 4) {
@@ -922,8 +988,10 @@ public class EncodeDecodeActivity extends Activity {
                 x = (7 - i) * (mWidth / 4) + (mWidth / 8);
                 y = (mHeight * 3) / 4;
             }
+
             y += cropTop;
             x += cropLeft;
+
             int testY, testU, testV;
             if (semiPlanar) {
                 // Galaxy Nexus uses OMX_TI_COLOR_FormatYUV420PackedSemiPlanar
@@ -935,8 +1003,9 @@ public class EncodeDecodeActivity extends Activity {
                 testY = frameData.get(y * width + x) & 0xff;
                 testU = frameData.get(width * height + (y / 2) * halfWidth + (x / 2)) & 0xff;
                 testV = frameData.get(width * height + halfWidth * (height / 2) +
-                        (y / 2) * halfWidth + (x / 2)) & 0xff;
+                        (y / 2) * halfWidth + (x/2)) & 0xff;
             }
+
             int expY, expU, expV;
             if (i == frameIndex % 8) {
                 // colored rect
@@ -956,6 +1025,7 @@ public class EncodeDecodeActivity extends Activity {
                 frameFailed = true;
             }
         }
+
         return !frameFailed;
     }
 
@@ -964,6 +1034,7 @@ public class EncodeDecodeActivity extends Activity {
      */
     private void generateSurfaceFrame(int frameIndex) {
         frameIndex %= 8;
+
         int startX, startY;
         if (frameIndex < 4) {
             // (0,0) is bottom-left in GL
@@ -973,6 +1044,7 @@ public class EncodeDecodeActivity extends Activity {
             startX = (7 - frameIndex) * (mWidth / 4);
             startY = 0;
         }
+
         GLES20.glDisable(GLES20.GL_SCISSOR_TEST);
         GLES20.glClearColor(TEST_R0 / 255.0f, TEST_G0 / 255.0f, TEST_B0 / 255.0f, 1.0f);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
@@ -991,6 +1063,7 @@ public class EncodeDecodeActivity extends Activity {
     private boolean checkSurfaceFrame(int frameIndex) {
         ByteBuffer pixelBuf = ByteBuffer.allocateDirect(4); // TODO - reuse this
         boolean frameFailed = false;
+
         for (int i = 0; i < 8; i++) {
             // Note the coordinates are inverted on the Y-axis in GL.
             int x, y;
@@ -1001,11 +1074,13 @@ public class EncodeDecodeActivity extends Activity {
                 x = (7 - i) * (mWidth / 4) + (mWidth / 8);
                 y = mHeight / 4;
             }
+
             GLES20.glReadPixels(x, y, 1, 1, GL10.GL_RGBA, GL10.GL_UNSIGNED_BYTE, pixelBuf);
             int r = pixelBuf.get(0) & 0xff;
             int g = pixelBuf.get(1) & 0xff;
             int b = pixelBuf.get(2) & 0xff;
             //Log.d(TAG, "GOT(" + frameIndex + "/" + i + "): r=" + r + " g=" + g + " b=" + b);
+
             int expR, expG, expB;
             if (i == frameIndex % 8) {
                 // colored rect
@@ -1027,6 +1102,7 @@ public class EncodeDecodeActivity extends Activity {
                 frameFailed = true;
             }
         }
+
         return !frameFailed;
     }
 
